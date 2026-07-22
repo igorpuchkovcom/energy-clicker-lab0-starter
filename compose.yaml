@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: energy
+      POSTGRES_USER: energy
+      POSTGRES_PASSWORD: energy
+    ports:
+      - "5432:5432"
+    volumes:
+      - energy-clicker-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U energy -d energy"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  app:
+    build:
+      context: .
+    environment:
+      APP_ADDR: ":8080"
+      DATABASE_URL: "postgres://energy:energy@db:5432/energy?sslmode=disable"
+      ALLOW_DEBUG_ENDPOINTS: "true"
+      SHUTDOWN_TIMEOUT: "10s"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    stop_grace_period: 15s
+    init: true
+
+volumes:
+  energy-clicker-db:

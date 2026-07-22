@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Energy Clicker — Lab 0</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">MIRRORQUEST · LAB 0</p>
+      <h1>Energy Clicker</h1>
+      <p class="subtitle">A tiny game for learning state, retries, idempotency, readiness, and graceful shutdown.</p>
+    </section>
+
+    <section class="panel stats">
+      <div>
+        <span class="label">Session</span>
+        <code id="session-id">none</code>
+      </div>
+      <div class="score-box">
+        <span class="label">Energy</span>
+        <strong id="points">0</strong>
+      </div>
+      <div>
+        <span class="label">API</span>
+        <span id="api-status" class="pill neutral">unknown</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>1. Start a game</h2>
+      <div class="actions">
+        <button id="new-session">Create session</button>
+        <button id="refresh-state" class="secondary">Refresh state</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>2A. Unsafe collect</h2>
+        <p>Every retry executes <code>points = points + 1</code> again.</p>
+        <button id="collect-unsafe" class="danger">Collect unsafely</button>
+        <button id="retry-unsafe" class="secondary">Retry unsafe request</button>
+      </article>
+
+      <article class="panel">
+        <h2>2B. Idempotent collect</h2>
+        <p>The same <code>Idempotency-Key</code> replays the original result.</p>
+        <button id="collect-safe">Collect safely</button>
+        <button id="retry-safe" class="secondary">Retry same safe request</button>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>3. Lost-response experiment</h2>
+      <label class="check">
+        <input type="checkbox" id="simulate-loss">
+        Commit in PostgreSQL, delay the server response, then abort the browser request
+      </label>
+      <p class="hint">First try unsafe collect with loss, then retry. Reset with a new session and repeat using safe collect.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Event log</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
