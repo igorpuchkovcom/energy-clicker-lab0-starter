@@ -123,16 +123,91 @@ func (s *Store) CollectUnsafe(ctx context.Context, sessionID string) (int64, err
 }
 
 func (s *Store) Collect(ctx context.Context, sessionID, idempotencyKey string) (int64, bool, error) {
-	// TODO(Lab 0):
-	// 1. Start a transaction.
-	// 2. Lock the session row with SELECT ... FOR UPDATE.
-	// 3. Look for (session_id, idempotency_key) in collect_requests.
-	// 4. Replay points_after when it already exists.
-	// 5. Otherwise increment points and insert the idempotency record.
-	// 6. Commit both effects atomically.
-	//
-	// See docs/LAB_0_WORKBOOK.md, Milestone D.
-	return 0, false, store.ErrNotImplemented
+	tx, err := s.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return 0, false, fmt.Errorf("begin collect ransaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	var currentPoints int64
+
+	err = tx.QueryRow(ctx, `
+		SELECT points
+		FROM game_sessions
+		WHERE id = $1
+		FOR UPDATE
+	`, sessionID).Scan(&currentPoints)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return 0, false, store.ErrNotFound
+	}
+	if err != nil {
+		return 0, false, fmt.Errorf("lock game session: %w", err)
+	}
+
+	var previousPoints int64
+
+	err = tx.QueryRow(ctx, `
+		SELECT points_after
+		FROM collect_requests
+		WHERE session_id = $1
+		  AND idempotency_key = $2
+	`, sessionID, idempotencyKey).Scan(&previousPoints)
+
+	if err == nil {
+		if err := tx.Commit(ctx); err != nil {
+			return 0, false, fmt.Errorf(
+				"commit replayed collect transaction: %w",
+				err,
+			)
+		}
+
+		return previousPoints, true, nil
+	}
+
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return 0, false, fmt.Errorf(
+			"query idempotency record: %w",
+			err,
+		)
+	}
+
+	newPoints := currentPoints + 1
+
+	_, err = tx.Exec(ctx, `
+		UPDATE game_sessions
+		SET points = $2,
+		    updated_at = now()
+		WHERE id = $1
+	`, sessionID, newPoints)
+	if err != nil {
+		return 0, false, fmt.Errorf("update game points: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO collect_requests (
+			session_id,
+			idempotency_key,
+			points_after
+		)
+		VALUES ($1, $2, $3)
+	`, sessionID, idempotencyKey, newPoints)
+
+	if err != nil {
+		return 0, false, fmt.Errorf(
+			"insert idempotency record: %w",
+			err,
+		)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return 0, false, fmt.Errorf(
+			"commit collect transaction: %w",
+			err,
+		)
+	}
+
+	return newPoints, false, nil
 }
 
 func (s *Store) Ping(ctx context.Context) error {
