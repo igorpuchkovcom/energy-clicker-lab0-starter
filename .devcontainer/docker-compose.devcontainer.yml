@@ -1,0 +1,29 @@
+# Dev Container override. Used together with ../compose.yaml:
+#   docker compose -f compose.yaml -f .devcontainer/docker-compose.devcontainer.yml ...
+#
+# PostgreSQL configuration is NOT duplicated here: the `db` service comes
+# entirely from the base compose.yaml. The production `app` service is not
+# started by the Dev Container (see runServices in devcontainer.json), so
+# port 8080 stays free for `go run ./cmd/server`.
+# NOTE: relative paths below are resolved against the project directory
+# (the directory of the FIRST compose file, i.e. the repository root).
+services:
+  devcontainer:
+    build:
+      context: .devcontainer
+      dockerfile: Dockerfile
+    init: true
+    volumes:
+      # Mount the repository at the canonical Dev Container workspace path.
+      - .:/workspaces/energy-clicker:cached
+    working_dir: /workspaces/energy-clicker
+    environment:
+      DATABASE_URL: "postgres://energy:energy@db:5432/energy?sslmode=disable"
+      APP_ADDR: ":8080"
+      ALLOW_DEBUG_ENDPOINTS: "true"
+      SHUTDOWN_TIMEOUT: "10s"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Keep the container alive for interactive development.
+    command: sleep infinity

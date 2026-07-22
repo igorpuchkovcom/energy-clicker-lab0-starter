@@ -1,0 +1,65 @@
+{
+  "name": "Energy Clicker Lab 0",
+  "dockerComposeFile": [
+    "../compose.yaml",
+    "docker-compose.devcontainer.yml"
+  ],
+  "service": "devcontainer",
+  // Start only PostgreSQL alongside the dev container. The production `app`
+  // service is intentionally not started so port 8080 stays free for
+  // `go run ./cmd/server`.
+  "runServices": [
+    "db"
+  ],
+  "workspaceFolder": "/workspaces/energy-clicker",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "vscode",
+  "features": {
+    // Docker CLI + compose inside the container, talking to the host
+    // Docker Desktop daemon (Docker-outside-of-Docker, no nested daemon).
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "forwardPorts": [
+    8080,
+    "db:5432"
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Energy Clicker API",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "go.useLanguageServer": true,
+        "go.formatTool": "goimports",
+        "go.testFlags": [
+          "-count=1"
+        ],
+        "go.toolsManagement.autoUpdate": false,
+        "go.delveConfig": {
+          "debugAdapter": "dlv-dap",
+          "showGlobalVariables": false
+        },
+        "[go]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "golang.go",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "files.eol": "\n"
+      }
+    }
+  }
+}

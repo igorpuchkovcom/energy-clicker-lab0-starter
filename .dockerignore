@@ -1,0 +1,9 @@
+.git
+.devcontainer
+.vscode
+bin
+coverage.out
+*.log
+.env
+.DS_Store
+.idea

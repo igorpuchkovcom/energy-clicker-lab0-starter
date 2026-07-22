@@ -1,0 +1,52 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Lab 0: Run API",
+      "type": "shell",
+      "command": "go run ./cmd/server",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab 0: Test",
+      "type": "shell",
+      "command": "go test ./...",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab 0: Test Race",
+      "type": "shell",
+      "command": "go test -race ./...",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab 0: Vet",
+      "type": "shell",
+      "command": "go vet ./...",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab 0: Idempotency Check",
+      "type": "shell",
+      "command": "./scripts/idempotency-check.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab 0: PostgreSQL Shell",
+      "type": "shell",
+      "command": "psql \"$DATABASE_URL\"",
+      "presentation": {
+        "focus": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

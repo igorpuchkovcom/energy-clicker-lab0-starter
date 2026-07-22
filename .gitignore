@@ -4,4 +4,6 @@ bin/
 coverage.out
 *.log
 .idea/
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json

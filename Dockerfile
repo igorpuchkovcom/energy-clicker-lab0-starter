@@ -5,6 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+RUN go mod verify
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/energy-clicker ./cmd/server
 
 FROM alpine:3.22
