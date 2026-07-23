@@ -1,0 +1,8 @@
+[
+  {"id":"good","url":"http://localhost:18081"},
+  {"id":"health-500","url":"http://localhost:18082"},
+  {"id":"not-ready","url":"http://localhost:18083"},
+  {"id":"hanging","url":"http://localhost:18084"},
+  {"id":"slow","url":"http://localhost:18085"},
+  {"id":"bad-dns","url":"http://mirror-does-not-exist.invalid:8080"}
+]

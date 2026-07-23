@@ -8,3 +8,4 @@ coverage.out
 !.vscode/tasks.json
 !.vscode/launch.json
 /server
+/mockmirror
