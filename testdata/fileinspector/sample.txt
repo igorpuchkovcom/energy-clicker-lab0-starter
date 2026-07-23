@@ -1,0 +1,8 @@
+MirrorQuest training
+
+Energy Clicker is complete.
+MirrorScout is next.
+Go errors are explicit.
+# Foo
+
+# Bar
